@@ -1,12 +1,17 @@
 package cn.name.controller;
 
+import cn.name.model.FileU;
 import org.apache.commons.io.FileUtils;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -14,7 +19,7 @@ import java.util.UUID;
  * 微博：@李明易DY
  */
 @Controller
-public class FileController {
+public class UploadFileController {
 
     @GetMapping("to_upload")
     public String to_upload(){
@@ -29,7 +34,7 @@ public class FileController {
      * @throws Exception
      */
     @PostMapping("do_upload")
-    public String do_upload(MultipartFile myFile, HttpServletRequest request) throws Exception{
+    public ModelAndView do_upload(MultipartFile myFile, HttpServletRequest request) throws Exception{
         //文件夹路径
         String url=request.getSession().getServletContext().getRealPath("/upload");
         if(!new File(url).exists()){
@@ -40,7 +45,12 @@ public class FileController {
         String fileName= UUID.randomUUID().toString().replaceAll("-","")+myFile.getOriginalFilename().substring(myFile.getOriginalFilename().lastIndexOf("."),myFile.getOriginalFilename().length());
         System.out.println(fileName);
         FileUtils.copyInputStreamToFile(myFile.getInputStream(),new File(url+ File.separator+fileName));
-        return "success";
+        ModelAndView mav=new ModelAndView();
+        FileU fileU=new FileU();
+        fileU.setFileName(fileName);
+        mav.addObject("list",fileU);
+        mav.setViewName("success");
+        return mav;
     }
 
     /**
@@ -51,7 +61,9 @@ public class FileController {
      * @throws Exception
      */
     @PostMapping("do_eupload")
-    public String do_eupload(MultipartFile[] files, HttpServletRequest request) throws Exception{
+    public ModelAndView do_eupload(MultipartFile[] files, HttpServletRequest request) throws Exception{
+        ModelAndView mav=new ModelAndView();
+        FileU fileU=new FileU();
         //文件夹路径
         String url=request.getSession().getServletContext().getRealPath("/upload");
         if(!new File(url).exists()){
@@ -63,9 +75,13 @@ public class FileController {
             //文件名
             String fileName=UUID.randomUUID().toString().replaceAll("-","")+myFile.getOriginalFilename().substring(myFile.getOriginalFilename().lastIndexOf("."),myFile.getOriginalFilename().length());
             System.out.println(fileName);
+            fileU.setFileName(fileName);
             FileUtils.copyInputStreamToFile(myFile.getInputStream(),new File(url+File.separator+fileName));
         }
-        return "success";
+
+        mav.addObject("list",fileU);
+        mav.setViewName("success");
+        return mav;
     }
 
     /**
